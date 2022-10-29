@@ -2,7 +2,7 @@ import math
 import numpy as np
 import torch
 from torch import nn as nn
-from my_utils import JSD, NWJ, TUBA, DV, SMILE
+from .my_utils import JSD, NWJ, TUBA, DV, SMILE
 from transformers import RobertaModel
 
 class PositionalEncoding(nn.Module):
@@ -147,20 +147,21 @@ class SMI(nn.Module):
                 # print(n)
                 torch.nn.init.xavier_normal_(p)
 
-    def forward_context_only(self, context, mask_ctx):
+    def forward(self, context=None, attention_mask=None, *args, **kwargs):
         if self.invert_mask:
-            mask_ctx = (mask_ctx == 0) * 1
+            attention_mask = (attention_mask == 0) * 1
         context_enc = self.embedding(context)
 
-        c_t = self.encoder(context_enc, mask_ctx)
-        if self.roberta_init:
-            c_t = c_t.last_hidden_state[:, 0, :].contiguous()  # torch.mean(c_t, dim=1) #(batch, d)
-        else:
-            c_t = c_t[:, 0, :]  # torch.mean(c_t, dim=1) #(batch, d)
+        c_t = self.encoder(context_enc, attention_mask)
+
+        # if self.roberta_init:
+        #     c_t = c_t.last_hidden_state[:, 0, :].contiguous()  # torch.mean(c_t, dim=1) #(batch, d)
+        # else:
+        #     c_t = c_t[:, 0, :]  # torch.mean(c_t, dim=1) #(batch, d)
 
         return c_t
 
-    def forward(self, context, response, mask_ctx, mask_rsp):
+    def forward_full(self, context=None, response=None, mask_ctx=None, mask_rsp=None, *args, **kwargs):
         if self.invert_mask:
             mask_ctx = (mask_ctx == 0) * 1
             mask_rsp = (mask_rsp == 0) * 1
