@@ -147,7 +147,7 @@ class SMI(nn.Module):
                 # print(n)
                 torch.nn.init.xavier_normal_(p)
 
-    def forward(self, context=None, attention_mask=None, *args, **kwargs):
+    def forward(self, input_ids=None, attention_mask=None, *args, **kwargs):
         if self.invert_mask:
             attention_mask = (attention_mask == 0) * 1
         context_enc = self.embedding(context)
