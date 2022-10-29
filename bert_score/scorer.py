@@ -99,8 +99,8 @@ class BERTScorer:
         self._tokenizer = AutoTokenizer.from_pretrained("roberta-base")
         # self._tokenizer = get_tokenizer(self.model_type, self._use_fast_tokenizer)
         # self._model = get_model(self.model_type, self.num_layers, self.all_layers)
-
-        checkpoint_path = "/content/ctc-gen-eval/train/checkpoints/DMI-Base_Rob-10_Sep/model_best_auc.pth"
+        HOME = os.getenv('HOME')
+        checkpoint_path = os.path.join(HOME, "ctc-gen-eval/train/checkpoints/DMI-Base_Rob-10_Sep/model_best_auc.pth")
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
         args = checkpoint['args']
         epoch = checkpoint['epoch']
