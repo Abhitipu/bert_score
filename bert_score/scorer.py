@@ -11,6 +11,7 @@ import pandas as pd
 import torch
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from transformers import AutoTokenizer
+from core import SMI
 
 from .utils import (bert_cos_score_idf, cache_scibert, get_bert_embedding,
                     get_hash, get_idf_dict, get_model, get_tokenizer,
@@ -94,8 +95,31 @@ class BERTScorer:
 
         # Building model and tokenizer
         self._use_fast_tokenizer = use_fast_tokenizer
-        self._tokenizer = get_tokenizer(self.model_type, self._use_fast_tokenizer)
-        self._model = get_model(self.model_type, self.num_layers, self.all_layers)
+        # HACK
+        self._tokenizer = AutoTokenizer._from_pretrained("roberta-base")
+        # self._tokenizer = get_tokenizer(self.model_type, self._use_fast_tokenizer)
+        # self._model = get_model(self.model_type, self.num_layers, self.all_layers)
+
+        checkpoint_path = "/content/ctc-gen-eval/train/checkpoints/DMI-Base_Rob-10_Sep/model_best_auc.pth"
+        checkpoint = torch.load(checkpoint_path, map_location=self.device)
+        args = checkpoint['args']
+        epoch = checkpoint['epoch']
+        loss = checkpoint['loss']
+        auc = checkpoint['auc']
+        state_dict = checkpoint['model_state_dict']
+
+        self._model = SMI(
+            vocab_size=len(self._tokenizer),
+            d_model=args['d_model'],
+            projection_size=args['projection'],
+            encoder_layers=args['encoder_layers'],
+            encoder_heads=args['encoder_heads'],
+            dim_feedforward=args.get('dim_feedforward', 2048), # 2048 is the default
+            roberta_init=roberta_init,
+            roberta_name=roberta_name
+        )
+        # self._tokenizer = get_tokenizer(self.model_type, self._use_fast_tokenizer)
+        # self._model = get_model(self.model_type, self.num_layers, self.all_layers)
         self._model.to(self.device)
 
         self._idf_dict = None
