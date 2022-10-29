@@ -150,7 +150,7 @@ class SMI(nn.Module):
     def forward(self, input_ids=None, attention_mask=None, *args, **kwargs):
         if self.invert_mask:
             attention_mask = (attention_mask == 0) * 1
-        context_enc = self.embedding(context)
+        context_enc = self.embedding(input_ids)
 
         c_t = self.encoder(context_enc, attention_mask)
 
