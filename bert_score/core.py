@@ -66,7 +66,7 @@ class Transformer(nn.Module):
 
         # self.probHead = nn.Linear(self.d_model, self.output_len)
 
-    def forward(self, x, mask):
+    def forward(self, x, mask, *args, **kwargs):
         # input - (batch, seq, hidden)
         # x = torch.randn(bs, input_len, d_model).to(device)
         # x = self.emb(x)
@@ -75,7 +75,7 @@ class Transformer(nn.Module):
         pos_x = self.pos_encoder(x)
         # print(mask)
         #         print(pos_x.shape)
-        encoder_output = self.encoder(pos_x, src_key_padding_mask=mask)  # (input_len, bs, d_model)
+        encoder_output = self.encoder(pos_x, src_key_padding_mask=mask, *args, **kwargs)  # (input_len, bs, d_model)
         # encoder_output = self.probHead(encoder_output)
         encoder_output = encoder_output.permute(1, 0, 2)  # torch.transpose(encoder_output, 0, 1)
         return encoder_output
@@ -148,11 +148,12 @@ class SMI(nn.Module):
                 torch.nn.init.xavier_normal_(p)
 
     def forward(self, input_ids=None, attention_mask=None, *args, **kwargs):
+        print(kwargs)
         if self.invert_mask:
             attention_mask = (attention_mask == 0) * 1
         context_enc = self.embedding(input_ids)
 
-        c_t = self.encoder(context_enc, attention_mask)
+        c_t = self.encoder(context_enc, attention_mask, *args, **kwargs)
 
         # if self.roberta_init:
         #     c_t = c_t.last_hidden_state[:, 0, :].contiguous()  # torch.mean(c_t, dim=1) #(batch, d)
