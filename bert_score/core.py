@@ -98,7 +98,7 @@ def recursive_init(module):
     try:
         for c in module.children():
             if hasattr(c, "reset_parameters"):
-                print("Reset:", c)
+                # print("Reset:", c)
                 c.reset_parameters()
             else:
                 recursive_init(c)
@@ -148,7 +148,6 @@ class SMI(nn.Module):
                 torch.nn.init.xavier_normal_(p)
 
     def forward(self, input_ids=None, attention_mask=None, *args, **kwargs):
-        print(kwargs)
         if self.invert_mask:
             attention_mask = (attention_mask == 0) * 1
         context_enc = self.embedding(input_ids)
